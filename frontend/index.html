@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>从藏书看MBTI</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fffaf0;
+      --ink: #25251f;
+      --muted: #77766e;
+      --line: #e7e0d2;
+      --coral: #df614c;
+      --teal: #277f79;
+      --gold: #d29a28;
+      --blue: #557bb8;
+      --surface: #fffdf8;
+      font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #20211f; --ink: #f3eee3; --muted: #bbb5a9; --line: #41413b; --surface: #292a27;
+    }
+    button { font: inherit; }
+    .page { max-width: 760px; margin: 0 auto; padding: 32px 22px 48px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+    .brand { font-size: 14px; font-weight: 700; letter-spacing: 0; }
+    .edition { color: var(--muted); font-size: 12px; }
+    .intro { padding: 40px 0 28px; max-width: 600px; }
+    .eyebrow { color: var(--coral); font-size: 12px; font-weight: 800; }
+    h1 { max-width: 540px; font-size: clamp(32px, 8vw, 54px); line-height: 1.12; margin: 12px 0; letter-spacing: 0; }
+    .lead { color: var(--muted); line-height: 1.8; max-width: 490px; margin: 0; }
+    .shelf { min-height: 116px; display: flex; align-items: end; gap: 8px; padding: 10px 18px 0; border-bottom: 5px solid #8c6845; margin: 0 0 30px; }
+    .book { width: 42px; height: var(--height); background: var(--color); border-radius: 4px 4px 0 0; position: relative; animation: rise .55s both; transform-origin: bottom; }
+    .book::after { content: ""; position: absolute; left: 7px; right: 7px; top: 12px; height: 2px; background: #fff9; box-shadow: 0 5px #fff6; }
+    .book:nth-child(2) { animation-delay: .06s; } .book:nth-child(3) { animation-delay: .12s; } .book:nth-child(4) { animation-delay: .18s; } .book:nth-child(5) { animation-delay: .24s; }
+    @keyframes rise { from { transform: scaleY(.1); opacity: .3; } to { transform: scaleY(1); opacity: 1; } }
+    .controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .primary { border: 0; border-radius: 4px; background: var(--ink); color: var(--paper); padding: 13px 20px; font-weight: 750; cursor: pointer; min-height: 48px; }
+    .primary:hover { background: var(--coral); }
+    .primary:disabled { cursor: wait; opacity: .65; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .error { color: #b73c31; margin: 16px 0; }
+    .result { margin-top: 34px; border-top: 1px solid var(--line); animation: appear .45s both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .result-head { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: end; padding: 26px 0 20px; }
+    .result-kicker { color: var(--muted); font-size: 12px; }
+    .type { font-size: clamp(48px, 12vw, 76px); line-height: 1; font-weight: 850; letter-spacing: 0; }
+    .archetype { color: var(--coral); font-size: 15px; font-weight: 750; padding-bottom: 8px; }
+    .stats { color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .axes { border-top: 1px solid var(--line); }
+    .axis { padding: 15px 0; border-bottom: 1px solid var(--line); }
+    .axis-top { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 9px; }
+    .axis-top strong { font-weight: 700; }
+    .track { height: 9px; display: flex; overflow: hidden; border-radius: 9px; background: var(--line); }
+    .fill-left { background: var(--coral); transition: width .65s ease; }
+    .fill-right { background: var(--teal); transition: width .65s ease; }
+    .commentary { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; padding: 13px 0; }
+    .commentary p { font-size: 13px; line-height: 1.7; margin: 6px 0; }
+    .section-title { font-size: 14px; margin: 24px 0 12px; }
+    .evidence { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { padding: 7px 10px; border: 1px solid var(--line); background: var(--surface); border-radius: 3px; font-size: 12px; }
+    .tag small { color: var(--muted); margin-left: 5px; }
+    .books { margin: 0; padding: 0; list-style: none; }
+    .books li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .books small { color: var(--muted); text-align: right; }
+    .disclaimer { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.7; }
+    [hidden] { display: none !important; }
+    @media (max-width: 520px) {
+      .page { padding: 22px 17px 36px; }
+      .intro { padding-top: 32px; }
+      .shelf { min-height: 95px; gap: 6px; padding-inline: 8px; }
+      .book { width: 34px; }
+      .commentary { grid-template-columns: 1fr; }
+      .result-head { grid-template-columns: 1fr; align-items: start; gap: 5px; }
+      .archetype { padding-bottom: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead"><span class="brand">藏书人格研究所</span><span class="edition">一份来自书架的趣味报告</span></header>
+    <section class="intro">
+      <div class="eyebrow">BOOKSHELF × PERSONALITY</div>
+      <h1>你的书架，<br>偷偷暴露了什么？</h1>
+      <p class="lead">从分类和标签里读出一点点性格线索。让你的藏书来做一次不太严肃、但可能很懂你的 MBTI 推理。</p>
+    </section>
+    <div class="shelf" aria-hidden="true">
+      <span class="book" style="--height:76px;--color:#df614c"></span><span class="book" style="--height:94px;--color:#277f79"></span><span class="book" style="--height:68px;--color:#d29a28"></span><span class="book" style="--height:86px;--color:#557bb8"></span><span class="book" style="--height:72px;--color:#a85872"></span>
+    </div>
+    <div class="controls"><button class="primary" id="analyze">翻开我的藏书人格</button><span class="hint">只读取书名、分类与标签，不会修改书库</span></div>
+    <p class="error" id="error" role="alert" hidden></p>
+    <section class="result" id="result" aria-live="polite" hidden>
+      <div class="result-head"><div><div class="result-kicker">你的藏书人格是</div><div class="type" id="type"></div><div class="stats" id="stats"></div></div><div class="archetype" id="archetype"></div></div>
+      <div class="axes" id="axes"></div>
+      <div class="commentary" id="commentary"></div>
+      <h2 class="section-title">书架留下的线索</h2>
+      <div class="evidence" id="evidence"></div>
+      <div id="book-list-wrap" hidden><h2 class="section-title">最会剧透的几本书</h2><ul class="books" id="book-list"></ul></div>
+      <p class="disclaimer">这是根据藏书分类与标签生成的娱乐画像，不是心理测评或专业诊断。标签越丰富，推理线索越多；书架不定义你，你才是书架的最终解释权。</p>
+    </section>
+  </main>
+  <script src="/static/toolbox-bridge.js"></script>
+  <script>
+    (function () {
+      var bridge = window.MyBooksToolBridge;
+      var button = document.getElementById('analyze');
+      var result = document.getElementById('result');
+      var error = document.getElementById('error');
+      var names = ['E 外向', 'I 内向', 'S 实感', 'N 直觉', 'T 思考', 'F 情感', 'J 判断', 'P 感知'];
+
+      function applyTheme(theme) { document.body.setAttribute('data-theme', theme || 'light'); }
+      if (bridge) {
+        applyTheme(bridge.theme);
+        bridge.onThemeChange(applyTheme);
+      }
+
+      function render(data) {
+        document.getElementById('type').textContent = data.type;
+        document.getElementById('archetype').textContent = '「' + data.archetype + '」';
+        document.getElementById('stats').textContent = '扫描 ' + data.book_count + ' 本书 · 找到 ' + data.signal_count + ' 条性格线索';
+        document.getElementById('axes').innerHTML = data.axes.map(function (axis) {
+          return '<div class="axis"><div class="axis-top"><strong>' + axis.left + ' ' + axis.left_percent + '%</strong><span>' + axis.right + ' ' + axis.right_percent + '%</span></div><div class="track"><span class="fill-left" style="width:' + axis.left_percent + '%"></span><span class="fill-right" style="width:' + axis.right_percent + '%"></span></div></div>';
+        }).join('');
+        document.getElementById('commentary').innerHTML = data.traits.map(function (line) { return '<p>' + line + '</p>'; }).join('');
+        document.getElementById('evidence').innerHTML = data.evidence.length ? data.evidence.map(function (item) {
+          return '<span class="tag">' + escapeHtml(item.label) + '<small>×' + item.count + '</small></span>';
+        }).join('') : '<span class="tag">书架暂时保密中</span>';
+        var books = document.getElementById('book-list');
+        books.innerHTML = data.books.map(function (book) {
+          return '<li><span>' + escapeHtml(book.title) + '</span><small>' + book.traits.map(function (trait) { return names.filter(function (name) { return name.charAt(0) === trait; })[0] || trait; }).join(' · ') + '</small></li>';
+        }).join('');
+        document.getElementById('book-list-wrap').hidden = !data.books.length;
+        result.hidden = false;
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (char) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+        });
+      }
+
+      button.addEventListener('click', async function () {
+        button.disabled = true;
+        button.textContent = '正在翻阅整座书架…';
+        error.hidden = true;
+        try {
+          var response = await bridge.fetch('analyze');
+          var payload = typeof response.json === 'function' ? await response.json() : response;
+          if (payload.err !== 'ok') throw new Error(payload.msg || '书架暂时没有回应，请稍后再试。');
+          render(payload.data);
+        } catch (err) {
+          error.textContent = err.message || '分析没有完成，请稍后重试。';
+          error.hidden = false;
+        } finally {
+          button.disabled = false;
+          button.textContent = '再测一次';
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
