@@ -1,9 +1,4 @@
-# 从藏书看MBTI
-
-本项目通过一句提示词生成：
-```
-根据mybooks工具开发文档(https://mybookstop.github.io/docs/manual/tool-development)，期望在当前生成一个根据统计书库书籍的类型(分类和标签)推断用户的MBTI类型。交互上充满娱乐效果，只需要支持中文。
-```
+# 从书库看MBTI
 
 [MyBooks](https://mybooks.top) 工具箱外置工具：读取书库书籍的分类和标签，根据类型关键词统计结果，趣味推测用户的 MBTI 类型。
 

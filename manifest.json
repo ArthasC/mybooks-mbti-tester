@@ -1,18 +1,18 @@
 {
-  "tool_id": "books_mbti",
-  "name": "从藏书看MBTI",
-  "description": "根据书库中的分类与标签生成一份娱乐向的MBTI藏书画像",
-  "revision": "0.1.0",
-  "author": "Arthas来了",
+  "tool_id": "mbti_tester",
+  "name": "从藏书看MBTI ",
+  "description": "统计书库中的分类与标签，趣味推测你的 MBTI 类型；虽属娱乐，严肃认真，一本正经；",
+  "revision": "0.2.0",
+  "author": "Arthas来也",
   "publish_date": "2026-10-07",
   "core_api_version": "1.3.0",
-  "entry_backend": "tool.BooksMBTI",
+  "entry_backend": "tool.MBTITester",
   "entry_frontend": "index.html",
-  "page": "books_mbti",
+  "page": "mbti_tester",
   "repo_url": "https://github.com/ArthasC/mybooks-mbti-tester",
   "locales": ["zh"],
   "default_locale": "zh",
   "api_routes": [
-    { "path": "analyze", "handler": "tool.AnalysisHandler" }
+    { "path": "analyze", "handler": "tool.AnalyzeHandler" }
   ]
 }
